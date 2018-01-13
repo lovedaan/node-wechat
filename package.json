@@ -1,0 +1,35 @@
+{
+  "name": "node-wechat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./start.js -watch ./server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "ejs": "^2.5.7",
+    "jsonwebtoken": "^8.1.0",
+    "koa": "^2.4.1",
+    "koa-body": "^2.5.0",
+    "koa-jwt": "^3.3.0",
+    "koa-router": "^7.3.0",
+    "koa-static": "^4.0.2",
+    "lodash": "^4.17.4",
+    "mongoose": "^4.13.6",
+    "nodemon": "^1.13.3",
+    "ramda": "^0.25.0",
+    "raw-body": "^2.3.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "sha1": "^1.1.1",
+    "xml2js": "^0.4.19"
+  }
+}

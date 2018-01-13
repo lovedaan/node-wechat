@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <title>用户中心</title>
+    <link rel="stylesheet" type="text/css" href="/css/weui.css" />
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jweixin-1.2.0.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <style type="text/css">
+        .pic{
+            text-align: center;
+            padding-top:10px;
+        }
+        .pic > img{
+            border-radius:50%;
+        }
+        .pic > p{
+            padding: 10px 0;
+        }
+        .tips{
+            text-align: center;
+            padding: 40px 0;
+            color:#201f1f;
+            font-weight:normal;
+        }
+        .btn{
+            margin:50px 0;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="pic">
+            <img width="80" :src="users.headimgurl" alt="" />
+            <p>{{users.nickname}}</p>
+        </div>
+        <div class="page__bd">
+            <div class="weui-cells__title">我关注的电影列表</div>
+            <div class="weui-cell weui-cell_swiped">
+                <div class="weui-cell__bd">
+                    <h2 class="tips" v-if="!movies.length">没有影片，快去观看吧！</h2>
+                    <div class="weui-cell" v-else="movies.length" v-for="(item,index) in movies" @click="goDetail(item.id)">
+                        <div class="weui-cell__hd"><img :src="item.src" alt="" style="width:80px;margin-right:5px;display:block"></div>
+                        <div class="weui-cell__bd">
+                            <p>{{item.title}}</p>
+                        </div>
+                        <div class="weui-cell__ft"><a @click.stop="deteleMovie(item.id)" class="weui-swiped-btn weui-swiped-btn_warn" href="javascript:" style="color:#fff;">删除</a></div>
+                    </div>
+                    <div class="btn">
+                        <a :href="homeUrl" class="weui-btn weui-btn_primary">观影</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+                <p class="weui-toast__content">删除成功</p>
+            </div>
+        </div>
+        <!--end toast-->
+
+    </div>
+    <script type="text/javascript">
+
+         new Vue({
+            el : '#app',
+            data :{
+                users :{},
+                movies : [],
+                homeUrl : 'index.html?type=index'
+            },
+            mounted(){
+                this.users = config.storage('userInfo');
+                this.getMovieList();
+            },
+            methods :{
+                goDetail(id){
+                    window.location.href = config.base + 'detail.html?type=detail&mid='+id;
+                },
+                getMovieList(){
+                    const vm = this;
+                    config.myAjax({
+                        url : '/usermovie',
+                        data : {
+                            openid : this.users.openid
+                        }
+                    },function (data) {
+                        if(data.success){
+                            vm.movies = data.result.list.movies;
+                        }
+                    });
+
+                },
+                deteleMovie(id){
+                    const vm = this;
+                    config.myAjax({
+                        type : 'post',
+                        url : '/deletemovie',
+                        data : {
+                            id : id,
+                            openid : this.users.openid
+                        }
+                    },function (data) {
+                        if(data.success){
+                            config.showToast('删除成功',function(){
+                                vm.getMovieList();
+                            });
+                        }
+                    });
+                },
+
+            }
+         });
+    </script>
+</body>
+</html>

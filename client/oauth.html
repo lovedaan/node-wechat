@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <title>loading</title>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        let state = getQueryString('state');
+        state = state.split('-');
+        const type = state[0];
+        let id = '';
+        if(state[1]){
+            //有传id
+            id = state[1];
+        }else{
+            //是空
+            id = '';
+        }
+        if(!config.storage('userInfo')){
+            //没有存储openid，重新获取一次
+            config.getUsers(function (data) {
+                config.storage('userInfo', data.data);
+                goPage(type);
+            });
+        }else{
+            //有存储则在本地获取
+            /*this.users = config.storage('userInfo');
+            config.initWx(function(){
+                let id = vm.getQueryString('state');
+                id = id.split('-')[1];
+                vm.getMovieDetail(id);
+            });*/
+            goPage(type);
+        }
+        //获取地址栏的参数
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
+        function goPage (page) {
+            let url = '';
+            if(page == 'detail' && id ){
+                url = config.base + 'detail.html?type='+type+'&mid='+id;
+            }else{
+                url = config.base + type +'.html?type='+type;
+            }
+
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <title>电影详情</title>
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jweixin-1.2.0.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/weui.css" />
+    <script type="text/javascript" src="/js/common.js"></script>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        a{
+            text-decoration:none;
+        }
+        #header{
+            position: fixed;
+            left:0;
+            top:0;
+            width: 100%;
+            height: 50px;
+            background:#000;
+        }
+        #header > h2{
+            text-align:center;
+            line-height:50px;
+            color:#fff;
+            font-weight:normal;
+            font-size: 15px;
+        }
+        .container{
+            padding: 55px 10px 10px;
+        }
+        .container .img{
+            text-align: center;
+            width: 100%;
+            margin-bottom:15px;
+        }
+        .container .img > img{
+            border:none;
+            vertical-align:top;
+            width: 100%;
+        }
+        .btn{
+            margin:50px 0;
+        }
+        .backHome{
+            position: absolute;
+            left: 10px;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height:50px;
+            color:#fff;
+            font-size:16px;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header id="header" class="">
+            <h2>{{movieObj.title}}</h2>
+            <a href="index.html?type=index" class="backHome">首页</a>
+        </header>
+        <div class="container" v-if="movieObj.images">
+            <div class="img">
+                <img @click="previewImg" :src="movieObj.images ? movieObj.images.large : ''" alt=""/>
+            </div>
+            <div class="info">
+                <p>导演：<span v-for="(director,index) in movieObj.directors"> {{director.name}}<i v-if="index != (movieObj.directors.length - 1)">、</i> </span></p>
+                <p>主演：<span v-for="(cast,index) in movieObj.casts"> {{cast.name}}<i v-if="index != (movieObj.casts.length - 1)">、</i> </span></p>
+                <p>类型：<span>{{movieObj.genres && movieObj.genres.toString()}}</span></p>
+                <p>年份：<span>{{movieObj.year}}</span></p>
+                <p>别名：<span>{{movieObj.original_title}}</span></p>
+            </div>
+            <div class="summary">
+                <p style="padding: 6px 0;">电影简介</p>
+                <div v-html="movieObj.summary" style="text-indent: 2em;color:#909090; font-size:14px;"></div>
+            </div>
+            <div class="btn">
+                <a href="javascript:;" @click="collectionMovie" class="weui-btn weui-btn_primary">加入收藏</a>
+            </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+                <p class="weui-toast__content">加入收藏成功！</p>
+            </div>
+        </div>
+        <!--end toast-->
+    </div>
+    <script type="text/javascript">
+
+        new Vue({
+            el : '#app',
+            data : {
+                movieObj : {},
+                users:{}
+            },
+            mounted(){
+
+                const vm = this;
+                this.users = config.storage('userInfo');
+                config.initWx(function(){
+                    const id = vm.getQueryString('mid');
+                    vm.getMovieDetail(id);
+                });
+            },
+            methods :{
+                //获取地址栏的参数
+                getQueryString (name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                    var r = window.location.search.substr(1).match(reg);
+                    if (r != null) return unescape(r[2]);
+                    return null;
+                },
+                backHome(){
+                    window.location.href = config.base + 'index.html?type=home';
+                },
+                getMovieDetail(id){
+                    const vm = this;
+                    config.myAjax({
+                        url : 'http://api.douban.com/v2/movie/subject/' + id,
+                        dataType : 'jsonp'
+                    },function (data) {
+                        vm.movieObj = data;
+                        vm.shareWx(data);
+                    });
+                },
+                shareWx(data){
+                    const opts = {
+                        title: data.title, // 分享标题
+                        link: URL+'&id='+ data.id, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                        imgUrl: data.images.large, // 分享图标
+                        desc: data.summary, // 分享描述
+                        type: '',
+                        dataUrl: '',
+                        success: function () {
+                            // 用户确认分享后执行的回调函数
+                            alert('分享成功');
+                        },
+                        cancel: function () {
+                            // 用户取消分享后执行的回调函数
+                            alert('分享取消');
+                        }
+                    };
+                    const share = {
+                        title: data.title, // 分享标题
+                        link: URL+'&id='+ data.id, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                        imgUrl: data.images.large, // 分享图标
+                        success: function () {
+                            // 用户确认分享后执行的回调函数
+                            alert('分享成功');
+                        },
+                        cancel: function () {
+                            // 用户取消分享后执行的回调函数
+                            alert('分享取消');
+                        }
+                    };
+                    wx.onMenuShareAppMessage(opts);
+                    wx.onMenuShareTimeline(share);
+                },
+                previewImg(){
+                    let ret = this.movieObj.casts.concat(this.movieObj.directors);
+                    ret = ret.map(item=>{
+                        let src = '';
+                        src = item.avatars.large;
+                        return src;
+                    });
+                    ret.unshift(this.movieObj.images.large);
+                    wx.previewImage({
+                        current: this.movieObj.images.large, // 当前显示图片的http链接
+                        urls: ret // 需要预览的图片http链接列表
+                    });
+                },
+                collectionMovie(){
+                    let opts = {};
+                    opts.openid = this.users.openid;
+                    opts.info = {
+                        src : this.movieObj.images.large,
+                        title : this.movieObj.title,
+                        id : this.movieObj.id
+                    }
+                    const vm = this;
+                    config.myAjax({
+                        type :'POST',
+                        url : '/collection-movie',
+                        data : opts
+                    },function (data) {
+                        if(data.success){
+                            config.showToast(data.msg);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
