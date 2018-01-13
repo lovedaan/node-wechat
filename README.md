@@ -32,3 +32,21 @@
 * 在调用jssdk的时候，服务端需要先验证签名，签名之前要先获取jsapi_ticket，ticket的获取也是需要token的
   这个token就是全局缓存的token
 * jsapi_ticket也是有2小时失效，也是需要缓存起来的
+
+## 下载运行
+
+确保本机电脑安装了node、git、mongodb等环境
+
+```
+#下载安装
+git clone https://github.com/lovedaan/node-wechat.git
+cd node-wechat
+#安装依赖
+npm i
+#打开数据库链接
+mongod --dbpath [数据库所在的文件夹路径]
+#开启内网穿透工具，绑定微信公众号域名
+在 server -- config ---index.js,填写你公众号的appID、appSecret、token、数据库名字
+#运行
+npm run dev（在微信开发者工具中输入代理域名）
+```
